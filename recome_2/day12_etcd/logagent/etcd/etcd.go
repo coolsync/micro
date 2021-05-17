@@ -52,7 +52,6 @@ func GetConf(key string) (logEntryConf []*LogEntry, err error) {
 	for _, ev := range resp.Kvs {
 		// fmt.Printf("%s:%s\n", ev.Key, ev.Value)
 		err = json.Unmarshal(ev.Value, &logEntryConf)
-
 		if err != nil {
 			fmt.Printf("unmarshal etcd value failed,err:%v\n", err)
 			return
@@ -71,8 +70,8 @@ func WatchConf(key string, newConfChan chan<- []*LogEntry) {
 		for _, evt := range wresp.Events {
 			// fmt.Printf("Type: %v, Key: %v, Value: %v\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
 			fmt.Printf("Type: %s, Key: %s, Value: %s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
-			var newConf []*LogEntry
 
+			var newConf []*LogEntry
 			// 判断 是否 是删除操作， delete operate 没有 value
 			if evt.Type != clientv3.EventTypeDelete {
 				err := json.Unmarshal(evt.Kv.Value, &newConf)
@@ -83,7 +82,8 @@ func WatchConf(key string, newConfChan chan<- []*LogEntry) {
 			}
 
 			// 将 获取的 data send to tailMgr newConfChan
-			fmt.Println("New conf file already send to tailMgr ... ")
+			fmt.Printf("Get new conf: %v, send to tailMgr\n", newConf)
+
 			newConfChan <- newConf
 		}
 	}

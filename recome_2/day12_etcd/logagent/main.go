@@ -6,6 +6,7 @@ import (
 	"logagent/etcd"
 	"logagent/kafka"
 	"logagent/taillog"
+	"logagent/utils"
 	"sync"
 	"time"
 
@@ -41,9 +42,16 @@ func main() {
 		return
 	}
 	fmt.Println("init etcd success.")
+	// 每个 logagent duo to etcd key 都有独自的配置， 可以使用 pull ip 方式， 也可以通过 业务线name 方式
+	ipStr, err := utils.GetOutBoundIP()
+	if err != nil {
+		fmt.Printf("get ip failed: %v\n", err)
+		return
+	}
+	etcdKey := fmt.Sprintf(cfg.EtcdConf.Key, ipStr)
 
 	// 3.1 From etcd get log collection conf info
-	logEntrys, err := etcd.GetConf(cfg.EtcdConf.Key)
+	logEntrys, err := etcd.GetConf(etcdKey)
 	if err != nil {
 		fmt.Printf("etcd.GetConf failed, err:%v\n", err)
 		return
@@ -57,11 +65,13 @@ func main() {
 	// 4. 打开日志文件 准备收集日志
 	taillog.Init(logEntrys)
 
-	newConfChan := taillog.NewConfChan()	// channel 在 taillog 初始化， 所以在 etcd.WatchConf 上面
+	newConfChan := taillog.NewConfChan() // channel 在 taillog 初始化， 所以在 etcd.WatchConf 上面
 
 	// 派一个哨兵去监视日志收集项的变化 （有变化及时通知log agent, 实现热加载配置）
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go etcd.WatchConf(cfg.EtcdConf.Key, newConfChan) // 通知 上面 tail mgr chan
+	go etcd.WatchConf(etcdKey, newConfChan) // 通知 上面 tail mgr chan
 	wg.Wait()
+
+	// select {}
 }

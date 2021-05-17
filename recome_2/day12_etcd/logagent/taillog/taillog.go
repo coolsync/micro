@@ -12,27 +12,30 @@ import (
 
 // TailTask: a log file collect task
 type TailTask struct {
-	topic    string
-	path     string
-	instance *tail.Tail
-	ctx      context.Context
-	cancel   context.CancelFunc
+	topic      string
+	path       string
+	instance   *tail.Tail
+	ctx        context.Context
+	cancelFunc context.CancelFunc
 }
 
 // New tail task
 func NewTailTask(topic string, path string) (tailObj *TailTask) {
-	tsk := &TailTask{
-		topic: topic,
-		path:  path,
+	ctx, cancel := context.WithCancel(context.Background())
+	tailObj = &TailTask{ // 千万千万别写成 :=
+		topic:      topic,
+		path:       path,
+		ctx:        ctx,
+		cancelFunc: cancel,
 	}
 
-	tsk.init()
+	tailObj.init() //  根据路径去打开对应的日志
 
 	return
 }
 
 // init single tail task
-func (t *TailTask) init() (err error) {
+func (t *TailTask) init() {
 	config := tail.Config{
 		ReOpen:    true,                                 // 重新打开
 		Follow:    true,                                 // 是否跟随
@@ -40,22 +43,25 @@ func (t *TailTask) init() (err error) {
 		MustExist: false,                                // 文件不存在不报错
 		Poll:      true,
 	}
+	var err error
 	t.instance, err = tail.TailFile(t.path, config)
 	if err != nil {
 		fmt.Println("tail file failed, err:", err)
-		return
+		// return
 	}
 
 	// 当 goruntine run func 退出时， goroutine 结束
 	go t.run() // after collected log, direct send to kafka
-
-	return
+	// return
 }
 
 // line by line send to kafka
 func (t *TailTask) run() {
 	for {
 		select {
+		case <-t.ctx.Done():
+			fmt.Printf("tail task %s_%s end!\n", t.path, t.topic)
+			return
 		case line := <-t.instance.Lines:
 			// kafka.SendToKafka(t.topic, line.Text) // slow, func call func
 			fmt.Printf("From %s get data %s success\n", t.path, line.Text)
