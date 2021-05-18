@@ -16,7 +16,7 @@ type logData struct {
 
 var (
 	client      sarama.SyncProducer // 声明一个全局的连接kafka的生产者client
-	logDataChan chan *logData
+	logDataChan chan *logData	// local chan, recv and encode out send msg
 )
 
 // Init 初始化client
@@ -26,7 +26,7 @@ func Init(addrs []string, chanMaxSize int) (err error) {
 	config.Producer.Partitioner = sarama.NewRandomPartitioner // 新选出⼀个 partition
 	config.Producer.Return.Successes = true                   // 成功交付的消息将在success channel返回
 
-	// 连接kafka
+	// 连接kafka, create sync producer cli
 	client, err = sarama.NewSyncProducer(addrs, config)
 	if err != nil {
 		fmt.Println("producer closed, err:", err)

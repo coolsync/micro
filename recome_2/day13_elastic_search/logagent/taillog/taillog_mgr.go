@@ -45,10 +45,10 @@ func (t *tailLogMgr) run() {
 				mk := fmt.Sprintf("%s_%s", conf.Path, conf.Topic)
 				_, ok := t.takMap[mk]
 				if ok {
-					// 如果在 tail tsk map 存在， 不操作
+					// In tail tsk map 存在， 不操作
 					continue
 				} else {
-					// 如果在 tail tsk map 不存在， 添加操作
+					// in tail tsk map 不存在， 添加 this tail tsk
 					tailObj := NewTailTask(conf.Topic, conf.Path)
 					fmt.Printf("New conf %s_%s on line!\n", conf.Path, conf.Topic)
 					t.takMap[mk] = tailObj

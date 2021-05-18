@@ -15,7 +15,9 @@ type Person struct {
 
 func main() {
 	// init connection, get cli obj
-	client, err := elastic.NewClient(elastic.SetURL("http://192.168.0.108:9200"))
+	// client, err := elastic.NewClient(elastic.SetURL("http://192.168.0.108:9200"))
+	client, err := elastic.NewClient(elastic.SetURL("http://192.168.0.107:9200"))
+
 	if err != nil {
 		// Handle error
 		panic(err)
