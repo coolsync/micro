@@ -20,7 +20,7 @@ func main() {
 	fmt.Printf("conf file load ok: %v\n", cfg)
 
 	// 2. init es
-	err = es.Init(cfg.EsConf.Address)
+	err = es.Init(cfg.EsConf.Address, cfg.EsConf.ChanSize, cfg.EsConf.Nums)
 	if err != nil {
 		fmt.Printf("init es client failed, err: %v\n", err)
 		return

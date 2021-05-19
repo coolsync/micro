@@ -34,10 +34,17 @@ func Init(addrs []string, topic string) error {
 			for msg := range pc.Messages() {
 				fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v\n", msg.Partition, msg.Offset, msg.Key, msg.Value)
 				// get log data, directly send to es
-				ld := map[string]interface{}{
-					"data": string(msg.Value),
+				// ld := map[string]interface{}{
+				// 	"data": string(msg.Value),
+				// }
+				// es.SendToES(topic)
+				// optimization, Modify function parameter transfer as channel transfer value
+
+				ld := &es.LogData{
+					Topic: topic,
+					Data:  string(msg.Value),
 				}
-				es.SendToES(topic, ld)
+				es.SendToESChan(ld)
 			}
 		}(pc)
 	}
