@@ -7,6 +7,7 @@ import (
 	"logagent/kafka"
 	"logagent/taillog"
 	"logagent/utils"
+	"strings"
 	"sync"
 	"time"
 
@@ -34,8 +35,11 @@ func main() {
 		return
 	}
 
-	cfg.KafkaConf.Address = ipStr + ":9092" // local addr give to conf addr
-	fmt.Println(cfg.KafkaConf.Address)
+	// fmt.Println(cfg.KafkaConf.Address)
+	if ipStr != strings.Split(cfg.KafkaConf.Address, ":")[0] {
+		cfg.KafkaConf.Address = ipStr + ":9092" // local addr give to conf addr
+	}
+	// fmt.Println(cfg.KafkaConf.Address)
 
 	// 2. 初始化kafka连接
 	err = kafka.Init([]string{cfg.KafkaConf.Address}, cfg.KafkaConf.ChanMaxSize)
