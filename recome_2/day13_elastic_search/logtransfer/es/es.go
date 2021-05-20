@@ -38,7 +38,7 @@ func Init(addr string, chanSize, numsGo int) (err error) {
 	return
 }
 
-// recv kafka send to chan data
+// recv kafka from chan send data
 func SendToESChan(msg *LogData) {
 	LogDataChan <- msg
 }
