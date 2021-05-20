@@ -1,0 +1,11 @@
+app:
+  name: myapp
+cache:
+  enable: false
+  list: [redis, memcache]
+mysql:
+  user: root
+  password: mypassword
+  host: 192.168.0.108
+  port: 3306
+  dbname: db1
