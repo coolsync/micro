@@ -14,7 +14,7 @@ func main() {
 	yamlConf := new(conf.YamlConf)
 
 	// read yaml file, get []data
-	yamlBytes, err := os.ReadFile("./conf/conf.yml")
+	yamlBytes, err := os.ReadFile("03go_yml/conf/conf.yml")
 	if err != nil {
 		log.Fatalf("read yaml file err: %v\n", err)
 	}
@@ -75,4 +75,11 @@ func main() {
 	} else {
 		fmt.Println("mysql value is not interface")
 	}
+
+	bytes, err := yaml.Marshal(&confMap)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("confMap dump: \n\n%v\n", string(bytes))
 }
