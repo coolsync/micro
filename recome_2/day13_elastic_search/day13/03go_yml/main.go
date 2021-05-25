@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -25,12 +25,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unmarshal file to struct err: %v\n", err)
 	}
-	fmt.Println("yamlConf: ", yamlConf)
-
-	// get conf data
-	fmt.Printf("mysql, host:%s, port: %d, dbname: %s\n", yamlConf.MysqlConf.Host, yamlConf.MysqlConf.Port, yamlConf.MysqlConf.DBName)
-
-	fmt.Printf("cache, enable: %t,list: %v\n", yamlConf.CacheConf.Enable, yamlConf.CacheConf.List)
 
 	// bind map
 	confMap := make(map[string]interface{})

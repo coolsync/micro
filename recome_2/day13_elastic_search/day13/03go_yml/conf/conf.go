@@ -8,6 +8,7 @@ type YamlConf struct {
 
 type AppConf struct {
 	Name string `yaml:"name"`
+	// ConfFile string `yaml:"conffile"`
 }
 
 type CacheConf struct {
