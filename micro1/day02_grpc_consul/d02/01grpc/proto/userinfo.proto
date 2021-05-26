@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./pb";
+
+package userinfo;
+
+// service method
+service UserInfo {
+    // method name
+    rpc GetUserInfo (UserRequest) returns (UserResponse);
+}
+
+// define request struct
+message UserRequest {
+    string name = 1;
+}
+
+// definee response struct 
+message UserResponse {
+    int32 id = 1;
+    string name = 2;
+    int32 age = 3;
+    repeated string address = 4;   // slice
+    oneof data  {
+        string fname = 5;
+        string lname = 6;
+    }
+}

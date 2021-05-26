@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+// option go_package = ".;day01";
+option go_package = "/pb;pb";
+// option go_package = ";pb";
+
+// define message body
+message Employee {
+    int32 age = 1;
+    string name = 2;
+    Person p = 3;
+    repeated int32 score = 4; // array or slice
+    Week w = 5;
+
+    // union body
+    oneof data {
+        string manager = 6;
+        string group = 7;
+    }
+}
+
+// nested message body
+message Person {
+    int32 weight = 1;
+}
+
+// define enum
+enum Week {
+    Monday = 0;
+    Tuesday = 1;
+}
+
+service Hello {
+    rpc Say(Person) returns (Employee);
+}
