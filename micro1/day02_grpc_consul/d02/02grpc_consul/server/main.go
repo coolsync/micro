@@ -34,7 +34,7 @@ func (s *server) GetUserInfo(ctx context.Context, in *pb.UserRequest) (*pb.UserR
 }
 
 func main() {
-	// +++++++++++ consul ++++++++++++
+	// +++++++++++ consul service register ++++++++++++
 	// 1. init consul conf
 	consulConf := consulApi.DefaultConfig()
 	// consulConf.Address = "http://127.0.0.1:8800"

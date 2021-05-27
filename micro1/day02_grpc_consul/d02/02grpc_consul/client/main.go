@@ -6,19 +6,43 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 )
 
 const (
-	address     = "localhost:8800"
+	// address     = "localhost:8800"
 	defaultName = "mark"
 )
 
 func main() {
+	// +++++++++++ consul service find ++++++++++++
+	// init consul conf
+	consul_conf := api.DefaultConfig()
+
+	// create client
+	consul_client, err := api.NewClient(consul_conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// from consul get health service
+	// func (h *Health) Service(service, tag string, passingOnly bool, q *QueryOptions) ([]*ServiceEntry, *QueryMeta, error)
+	services, _, err := consul_client.Health().Service("Grpc and Consul", "grpc", true, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// simple 负载均衡
+	addr := services[0].Service.Address + ":" + strconv.Itoa(services[0].Service.Port)
+
+	// +++++++++++ grpc remote call ++++++++++++
 	// 1. dial grpc srv
-	cliConn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	// cliConn, err := grpc.Dial("localhost:8800" grpc.WithInsecure(), grpc.WithBlock())
+	cliConn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatal(err)
 	}
