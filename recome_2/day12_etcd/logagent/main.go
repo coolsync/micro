@@ -42,6 +42,7 @@ func main() {
 		return
 	}
 	fmt.Println("init etcd success.")
+	
 	// 每个 logagent duo to etcd key 都有独自的配置， 可以使用 pull ip 方式， 也可以通过 业务线name 方式
 	ipStr, err := utils.GetOutBoundIP()
 	if err != nil {

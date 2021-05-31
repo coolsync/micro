@@ -72,7 +72,7 @@ func WatchConf(key string, newConfChan chan<- []*LogEntry) {
 			fmt.Printf("Type: %s, Key: %s, Value: %s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
 
 			var newConf []*LogEntry
-			// 判断 是否 是删除操作， delete operate 没有 value
+			// 判断 是否 是删除操作， delete operate no value
 			if evt.Type != clientv3.EventTypeDelete {
 				err := json.Unmarshal(evt.Kv.Value, &newConf)
 				if err != nil {
