@@ -1,0 +1,145 @@
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+
+	"fmt"
+	"log"
+	"net/http"
+
+	consulapi "github.com/hashicorp/consul/api"
+)
+
+func main() {
+	r := gin.Default()
+
+	// consul健康检查回调函数
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "ok",
+		})
+	})
+
+	// 注册服务到consul
+	ConsulRegister()
+
+	// 从consul中发现服务
+	ConsulFindServer()
+
+	// 取消consul注册的服务
+	//ConsulDeRegister()
+
+	http.ListenAndServe(":8081", r)
+}
+
+// 注册服务到consul
+func ConsulRegister() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	// 创建注册到consul的服务到
+	registration := new(consulapi.AgentServiceRegistration)
+	registration.ID = "111"
+	registration.Name = "go-consul-test"
+	registration.Port = 8081
+	registration.Tags = []string{"go-consul-test"}
+	registration.Address = "10.13.153.128"
+
+	// 增加consul健康检查回调函数
+	check := new(consulapi.AgentServiceCheck)
+	check.HTTP = fmt.Sprintf("http://%s:%d", registration.Address, registration.Port)
+	check.Timeout = "5s"
+	check.Interval = "5s"
+	check.DeregisterCriticalServiceAfter = "30s" // 故障检查失败30s后 consul自动将注册服务删除
+	registration.Check = check
+
+	// 注册服务到consul
+	err = client.Agent().ServiceRegister(registration)
+}
+
+// 取消consul注册的服务
+func ConsulDeRegister() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	client.Agent().ServiceDeregister("111")
+}
+
+// 从consul中发现服务
+func ConsulFindServer() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	// 获取所有service
+	services, _ := client.Agent().Services()
+	for _, value := range services {
+		fmt.Println(value.Address)
+		fmt.Println(value.Port)
+	}
+
+	fmt.Println("=================================")
+	// 获取指定service
+	service, _, err := client.Agent().Service("111", nil)
+	if err == nil {
+		fmt.Println(service.Address)
+		fmt.Println(service.Port)
+	}
+
+}
+
+func ConsulCheckHeath() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	// 健康检查
+	a, b, _ := client.Agent().AgentHealthServiceByID("111")
+	fmt.Println(a)
+	fmt.Println(b)
+}
+
+func ConsulKVTest() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	// KV, put值
+	values := "test"
+	key := "go-consul-test/172.16.242.129:8100"
+	client.KV().Put(&consulapi.KVPair{Key: key, Flags: 0, Value: []byte(values)}, nil)
+
+	// KV get值
+	data, _, _ := client.KV().Get(key, nil)
+	fmt.Println(string(data.Value))
+
+	// KV list
+	datas, _, _ := client.KV().List("go", nil)
+	for _, value := range datas {
+		fmt.Println(value)
+	}
+	keys, _, _ := client.KV().Keys("go", "", nil)
+	fmt.Println(keys)
+}

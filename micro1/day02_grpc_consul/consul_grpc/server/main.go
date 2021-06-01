@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"d02/02grpc_consul/pb"
-	"fmt"
+	"errors"
+	"implconsul/consulexe"
+	"implconsul/pb"
 	"log"
 	"net"
 
-	consulApi "github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 )
 
@@ -29,39 +29,12 @@ func (s *server) GetUserInfo(ctx context.Context, in *pb.UserRequest) (*pb.UserR
 			Address: []string{"addr1", "addr2"},
 		}, nil
 	}
-	return nil, fmt.Errorf("user no exist!")
+	return nil, errors.New("user no exist") // error strings should not end with punctuation or a newline (ST1005)
 }
 
 func main() {
 	// +++++++++++ consul service register ++++++++++++
-	// 1. init consul conf
-	consulConf := consulApi.DefaultConfig()
-	// consulConf.Address = "http://127.0.0.1:8800"
-
-	// 2. create client consulApi
-	consulClient, err := consulApi.NewClient(consulConf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// 3. tell consul, Conf info of the service to be registered
-	// svr,err := connect.NewService("bj38", consulClient)
-	reg := consulApi.AgentServiceRegistration{
-		ID:      "bj38",
-		Tags:    []string{"grpc", "consul"},
-		Name:    "Grpc and Consul",
-		Address: "localhost",
-		Port:    8800,
-		Check: &api.AgentServiceCheck{
-			CheckID:  "consul grpc test",
-			TCP:      "localhost:8800",
-			Timeout:  "1s",
-			Interval: "5s",
-		},
-	}
-
-	// 4. register grpc service to consul
-	consulClient.Agent().ServiceRegister(&reg)
+	consulexe.ConsulRegister()
 
 	// +++++++++++ grpc remote call ++++++++++++
 	// 1. create listener
