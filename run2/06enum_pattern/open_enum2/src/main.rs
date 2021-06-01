@@ -25,10 +25,16 @@ fn main() {
     let sum = x + tmp;
     println!("sum: {}", sum);
 
-    let r = plus_one(y);
-    match r {
-        None => println!("nothing"),
-        Some(i) => println!("r: {}", i)
+    // let r = plus_one(y);
+    // match r {
+    //     None => println!("nothing"),
+    //     Some(i) => println!("r: {}", i)
+    // }
+
+    if let Some(value) = plus_one(y) {
+        println!("value = {}", value);
+    } else {
+        println!("do nothing");
     }
 }
 
